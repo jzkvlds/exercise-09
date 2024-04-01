@@ -1,0 +1,167 @@
+---
+title: "Exercise-09"
+author: "Jessica V"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(skimr)
+```
+
+
+#Step 1
+# #Here I load in the data “Street_et_al_2017.csv” as a tbble named d
+```{r}
+f <- "https://raw.githubusercontent.com/difiore/ada-2024-datasets/main/Street_et_al_2017.csv"
+
+d <- read_csv(f, col_names = TRUE)
+```
+
+
+# # Here I do a quick exploratory data analysis where I generate the five-number summary (median, minimum and maximum and 1st and 3rd quartile values), plus mean and standard deviation, for each quantitative variable.
+```{r}
+skim(d)
+```
+
+#Step 2
+# # Here I
+plot brain size (ECV) as a function of social group size (Group_size), longevity (Longevity), juvenile period length (Weaning), and reproductive lifespan (Repro_lifespan).
+
+```{r}
+library(ggplot2)
+
+plot(data = d, ECV ~ Group_size)
+plot(data = d, ECV ~ Longevity)
+plot(data = d, ECV ~ Weaning)
+plot(data = d, ECV ~ Repro_lifespan)
+
+
+ggplot(d, aes(x = Group_size, y = ECV)) +
+  geom_point() +
+  labs(x = "Social Group Size", y = "Brain Size (ECV)", title = "Brain Size vs. Social Group Size")
+
+ggplot(d, aes(x = Longevity, y = ECV)) +
+  geom_point() +
+  labs(x = "Longevity", y = "Brain Size (ECV)", title = "Brain Size vs. Longevity")
+
+ggplot(d, aes(x = Weaning, y = ECV)) +
+  geom_point() +
+  labs(x = "Weaning", y = "Brain Size (ECV)", title = "Brain Size vs. Juvenile period length ")
+
+ggplot(d, aes(x = Repro_lifespan, y = ECV)) +
+  geom_point() +
+  labs(x = "reproductive lifespan ", y = "Brain Size (ECV)", title = "Brain Size vs. reproductive lifespan")
+
+```
+
+
+Step 3
+Here I derive by hand the ordinary least squares regression coefficients  and  for ECV as a function of social group size.
+HINT: You will need to remove rows from your dataset where one of these variables is missing.
+
+```{r}
+
+d_complete <- d[complete.cases(d$ECV, d$Group_size), ]
+
+#Beta1
+(beta1 <- cor(d_complete$Group_size, d_complete$ECV) * (sd(d_complete$ECV)/sd(d_complete$Group_size))) 
+beta1
+
+
+
+
+#(beta1 <- cor(d_complete$ECV, d_complete$Group_size) * (sd(d_complete$Group_size)/sd(d_complete$ECV)))
+
+#(beta1 <- cov(d_complete$ECV, d_complete$Group_size)/var(d_complete$ECV))
+
+#(beta1 <- sum((d_complete$Group_size - mean(d_complete$Group_size)) * (d_complete$ECV - mean(d_complete$ECV)))/sum((d_complete$ECV - mean(d_complete$ECV))^2))
+
+#Beta0
+(beta0 <- mean(d_complete$ECV) - beta1 * mean(d_complete$Group_size))
+beta0
+
+```
+Step 4
+Confirm that you get the same results using the lm() function. Yes!
+
+```{r}
+m <- lm(d_complete$ECV ~ d_complete$Group_size, data = d)
+m
+
+
+```
+
+Step 5
+Repeat the analysis above for three different major radiations of primates - “catarrhines”, “platyrrhines”, and “strepsirhines”) separately. These are stored in the variable Taxonomic_group. Do your regression coefficients differ among groups? How might you determine this?
+
+```{r}
+#For catarrhines
+	
+Catarrhini <- d[d$Taxonomic_group == "Catarrhini", ]
+plot(data = Catarrhini, ECV ~ Group_size)
+plot(data = Catarrhini, ECV ~ Longevity)
+plot(data = Catarrhini, ECV ~ Weaning)
+plot(data = Catarrhini, ECV ~ Repro_lifespan)
+
+complete_Catarrhini <- Catarrhini[complete.cases(Catarrhini$ECV, Catarrhini$Group_size), ]
+
+(beta1 <- cor(complete_Catarrhini$Group_size, complete_Catarrhini$ECV) * (sd(complete_Catarrhini$ECV)/sd(complete_Catarrhini$Group_size))) 
+beta1
+
+(beta0 <- mean(complete_Catarrhini$ECV) - beta1 * mean(complete_Catarrhini$Group_size))
+beta0
+
+m <- lm(complete_Catarrhini$ECV ~ complete_Catarrhini$Group_size, data = complete_Catarrhini)
+m
+
+# for platyrrhines
+	
+Platyrrhini <- d[d$Taxonomic_group == "Platyrrhini", ]
+plot(data = Platyrrhini, ECV ~ Group_size)
+plot(data = Platyrrhini, ECV ~ Longevity)
+plot(data = Platyrrhini, ECV ~ Weaning)
+plot(data = Platyrrhini, ECV ~ Repro_lifespan)
+
+complete_Platyrrhini <- Platyrrhini[complete.cases(Platyrrhini$ECV, Platyrrhini$Group_size), ]
+
+(beta1 <- cor(complete_Platyrrhini$Group_size, complete_Platyrrhini$ECV) * (sd(complete_Platyrrhini$ECV)/sd(complete_Platyrrhini$Group_size))) 
+beta1
+
+(beta0 <- mean(complete_Platyrrhini$ECV) - beta1 * mean(complete_Platyrrhini$Group_size))
+beta0
+
+m <- lm(complete_Platyrrhini$ECV ~ complete_Platyrrhini$Group_size, data = complete_Platyrrhini)
+m
+
+#for strepsirhines
+
+Strepsirhini <- d[d$Taxonomic_group == "Strepsirhini", ]
+plot(data = Strepsirhini, ECV ~ Group_size)
+plot(data = Strepsirhini, ECV ~ Longevity)
+plot(data = Strepsirhini, ECV ~ Weaning)
+plot(data = Strepsirhini, ECV ~ Repro_lifespan)
+
+complete_Strepsirhini<- Strepsirhini[complete.cases(Strepsirhini$ECV, Strepsirhini$Group_size), ]
+
+(beta1 <- cor(complete_Strepsirhini$Group_size, complete_Strepsirhini$ECV) * (sd(complete_Strepsirhini$ECV)/sd(complete_Strepsirhini$Group_size))) 
+beta1
+
+(beta0 <- mean(complete_Strepsirhini$ECV) - beta1 * mean(complete_Strepsirhini$Group_size))
+beta0
+
+m <- lm(complete_Strepsirhini$ECV ~ complete_Strepsirhini$Group_size, data = complete_Strepsirhini)
+
+m
+```
+Step 6
+For your first regression of ECV on social group size, calculate the standard error for the slope coefficient, the 95% CI, and the p value associated with this coefficient by hand. Also extract this same information from the results of running the lm() function.
+
+```{}
+
+```
+Step 7
+Use a permutation approach with 1000 permutations to generate a null sampling distribution for the slope coefficient. What is it that you need to permute? What is the p value associated with your original slope coefficient? You can use either the percentile method (i.e., using quantiles from the actual permutation-based null sampling distribution) or a theory-based method (i.e., using the standard deviation of the permutation-based null sampling distribution as the estimate of the standard error, along with a normal or t distribution), or both, to calculate this p value.
+Step 8
+Use bootstrapping to generate a 95% CI for your estimate of the slope coefficient using both the percentile method and the theory-based method (i.e., using on the standard deviation of the bootstrapped sampling distribution as an estimate of the standard error). Do these CIs suggest that your slope coefficient is different from zero?
